@@ -40,3 +40,26 @@ pub async fn auth_middleware(
     
     Ok(next.run(req).await)
 }
+
+pub async fn optional_auth_middleware(
+    mut req: Request<Body>,
+    next: Next,
+) -> Response {
+    let auth_header = req.headers()
+        .get(header::AUTHORIZATION)
+        .and_then(|h| h.to_str().ok())
+        .and_then(|h| h.strip_prefix("Bearer "));
+
+    if let Some(token) = auth_header {
+        let secret = env::var("JWT_SECRET").unwrap_or_else(|_| "secret".to_string());
+        if let Ok(token_data) = decode::<Claims>(
+            token,
+            &DecodingKey::from_secret(secret.as_ref()),
+            &Validation::default(),
+        ) {
+            req.extensions_mut().insert(token_data.claims);
+        }
+    }
+
+    next.run(req).await
+}

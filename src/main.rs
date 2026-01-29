@@ -3,7 +3,7 @@ mod handlers;
 mod middleware;
 
 use axum::{
-    routing::{get, post},
+    routing::{get, post, put, delete},
     Router,
     middleware::from_fn,
 };
@@ -34,16 +34,21 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .route("/register", post(handlers::auth::register))
         .route("/login", post(handlers::auth::login));
 
-    // Protected routes
-    let api_routes = Router::new()
-        .route("/profile", get(|| async { "This is a protected profile" }))
+    // Protected article management routes
+    let article_mgmt_routes = Router::new()
+        .route("/", get(handlers::article::list_user_articles))
+        .route("/", post(handlers::article::create_article))
+        .route("/:id", put(handlers::article::update_article))
+        .route("/:id", delete(handlers::article::delete_article))
         .layer(from_fn(middleware::auth::auth_middleware));
 
     // Build application with routes
     let app = Router::new()
         .route("/", get(|| async { "Hello, Article Recorder!" }))
         .nest("/api/auth", auth_routes)
-        .nest("/api", api_routes)
+        .nest("/api/articles", article_mgmt_routes)
+        .route("/:slug", get(handlers::article::get_article_by_slug))
+        .layer(from_fn(middleware::auth::optional_auth_middleware))
         .with_state(pool);
 
     // Run the server

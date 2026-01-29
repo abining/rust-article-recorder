@@ -1,6 +1,11 @@
+mod models;
+mod handlers;
+mod middleware;
+
 use axum::{
-    routing::get,
+    routing::{get, post},
     Router,
+    middleware::from_fn,
 };
 use std::net::SocketAddr;
 use sqlx::mysql::MySqlPoolOptions;
@@ -19,14 +24,27 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let database_url = env::var("DATABASE_URL")
         .expect("DATABASE_URL must be set");
     
-    let _pool = MySqlPoolOptions::new()
+    let pool = MySqlPoolOptions::new()
         .max_connections(5)
         .connect(&database_url)
         .await?;
 
-    // Build application with a route
+    // Auth routes
+    let auth_routes = Router::new()
+        .route("/register", post(handlers::auth::register))
+        .route("/login", post(handlers::auth::login));
+
+    // Protected routes
+    let api_routes = Router::new()
+        .route("/profile", get(|| async { "This is a protected profile" }))
+        .layer(from_fn(middleware::auth::auth_middleware));
+
+    // Build application with routes
     let app = Router::new()
-        .route("/", get(|| async { "Hello, Article Recorder!" }));
+        .route("/", get(|| async { "Hello, Article Recorder!" }))
+        .nest("/api/auth", auth_routes)
+        .nest("/api", api_routes)
+        .with_state(pool);
 
     // Run the server
     let port = env::var("PORT").unwrap_or_else(|_| "3000".to_string());

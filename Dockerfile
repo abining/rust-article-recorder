@@ -1,5 +1,5 @@
 # Build stage
-FROM rust:1.75-bookworm as builder
+FROM rust:1.75-bookworm AS builder
 
 WORKDIR /app
 COPY . .
@@ -19,7 +19,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy the binary from the builder stage
-COPY --from:builder /app/target/release/rust-article-recorder /app/rust-article-recorder
+COPY --from=builder /app/target/release/rust-article-recorder /app/rust-article-recorder
 COPY .env.example /app/.env
 
 EXPOSE 3000

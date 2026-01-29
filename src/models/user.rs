@@ -1,9 +1,10 @@
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
+use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize, FromRow)]
 pub struct User {
-    pub id: Vec<u8>, // Binary(16) in MySQL
+    pub id: Uuid, // Binary(16) in MySQL
     pub username: String,
     pub password_hash: String,
 }

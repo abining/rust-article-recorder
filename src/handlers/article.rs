@@ -15,7 +15,7 @@ pub async fn list_user_articles(
     Extension(claims): Extension<Claims>,
 ) -> impl IntoResponse {
     let author_id = match Uuid::parse_str(&claims.sub) {
-        Ok(id) => id.as_bytes().to_vec(),
+        Ok(id) => id,
         Err(_) => return StatusCode::UNAUTHORIZED.into_response(),
     };
 
@@ -38,7 +38,7 @@ pub async fn create_article(
     Json(payload): Json<CreateArticleRequest>,
 ) -> impl IntoResponse {
     let author_id = match Uuid::parse_str(&claims.sub) {
-        Ok(id) => id.as_bytes().to_vec(),
+        Ok(id) => id,
         Err(_) => return StatusCode::UNAUTHORIZED.into_response(),
     };
 
@@ -66,7 +66,7 @@ pub async fn update_article(
     Json(payload): Json<UpdateArticleRequest>,
 ) -> impl IntoResponse {
     let author_id = match Uuid::parse_str(&claims.sub) {
-        Ok(id) => id.as_bytes().to_vec(),
+        Ok(id) => id,
         Err(_) => return StatusCode::UNAUTHORIZED.into_response(),
     };
 
@@ -105,7 +105,7 @@ pub async fn delete_article(
     Path(id): Path<i32>,
 ) -> impl IntoResponse {
     let author_id = match Uuid::parse_str(&claims.sub) {
-        Ok(id) => id.as_bytes().to_vec(),
+        Ok(id) => id,
         Err(_) => return StatusCode::UNAUTHORIZED.into_response(),
     };
 
@@ -141,7 +141,7 @@ pub async fn get_article_by_slug(
 
             if let Some(Extension(c)) = claims {
                 if let Ok(user_id) = Uuid::parse_str(&c.sub) {
-                    if a.author_id == user_id.as_bytes().to_vec() {
+                    if a.author_id == user_id {
                         return Json(a).into_response();
                     }
                 }

@@ -82,7 +82,7 @@ pub async fn login(
         .expect("valid timestamp")
         .timestamp();
 
-    let user_id = Uuid::from_slice(&user.id).unwrap_or_default().to_string();
+    let user_id = user.id.to_string();
     let claims = Claims {
         sub: user_id,
         exp: expiration,

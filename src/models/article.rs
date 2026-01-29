@@ -1,11 +1,12 @@
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use chrono::{DateTime, Utc};
+use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize, FromRow)]
 pub struct Article {
     pub id: i32,
-    pub author_id: Vec<u8>,
+    pub author_id: Uuid,
     pub slug: String,
     pub title: String,
     pub content: String,
